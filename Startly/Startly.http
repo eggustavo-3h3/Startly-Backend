@@ -1,0 +1,6 @@
+@Startly_HostAddress = http://localhost:5188
+
+GET {{Startly_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
