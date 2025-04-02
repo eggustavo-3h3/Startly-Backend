@@ -1,22 +1,93 @@
-using Microsoft.AspNetCore.Hosting;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Startly.Domain.DTOs.Atuacao;
 using Startly.Domain.DTOs.Base;
+using Startly.Domain.DTOs.Login;
 using Startly.Domain.DTOs.Startup.Adicionar;
 using Startly.Domain.DTOs.Startup.Atualizar;
 using Startly.Domain.DTOs.Startup.Pesquisar;
 using Startly.Domain.Entities;
 using Startly.Infra.Data.Context;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(config =>
+{
+    config.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Startly",
+        Version = "v1",
+        Description = "API para conexao de investidores e startups pela Startly"
+    });
+
+    config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"<b>JWT Autorização</b> <br/> 
+                      Digite 'Bearer' [espaço] e em seguida seu token na caixa de texto abaixo.
+                      <br/> <br/>
+                      <b>Exemplo:</b> 'bearer 123456abcdefg...'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    config.AddSecurityRequirement(new OpenApiSecurityRequirement()
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        },
+                        Scheme = "oauth2",
+                        Name = "Bearer",
+                        In = ParameterLocation.Header
+                    },
+                    new List<string>()
+                }
+            });
+});
+
+
 builder.Services.AddDbContext<StartlyContext>();
+
+builder.Services.AddAuthentication(
+    JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "startly",
+            ValidAudience = "startly",
+            IssuerSigningKey = new SymmetricSecurityKey(
+              Encoding.UTF8.GetBytes(
+                  "{b76ecac1-7f05-455b-a51d-0ef0500c8e4c}"))
+        };
+    });
+
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 
@@ -32,7 +103,7 @@ app.MapGet("atuacao/listar", (StartlyContext context) =>
     }).ToList();
 
     return Results.Ok(listaAtuacaoDto);
-});
+}).RequireAuthorization().WithTags("Atuação");
 
 app.MapGet("atuacao/obter/{Id}", (StartlyContext context, Guid Id) =>
 {
@@ -48,7 +119,7 @@ app.MapGet("atuacao/obter/{Id}", (StartlyContext context, Guid Id) =>
     };
 
     return Results.Ok(atuacaoDto);
-});
+}).RequireAuthorization().WithTags("Atuação");
 
 app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto atuacaoDto) =>
 {
@@ -62,7 +133,8 @@ app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto at
     context.SaveChanges();
 
     return Results.Created("Created", "Atuacao Registrada com Sucesso");
-});
+}).RequireAuthorization().WithTags("Atuação");
+
 
 app.MapPut("atuacao/atualizar", (StartlyContext context, AtuacaoAtualizarDto atuacaoAtualizarDto) =>
 {
@@ -76,7 +148,7 @@ app.MapPut("atuacao/atualizar", (StartlyContext context, AtuacaoAtualizarDto atu
     context.SaveChanges();
 
     return Results.Ok("Atuação atualizada com sucesso");
-});
+}).RequireAuthorization().WithTags("Atuação");
 
 app.MapDelete("atuacao/remover/{Id}", (StartlyContext context, Guid Id) =>
 {
@@ -88,7 +160,7 @@ app.MapDelete("atuacao/remover/{Id}", (StartlyContext context, Guid Id) =>
     context.AtuacaoSet.Remove(atuacao);
     context.SaveChanges();
     return Results.Ok("Atuacao removida com sucesso");
-});
+}).RequireAuthorization().WithTags("Atuação");
 
 #endregion
 
@@ -154,8 +226,8 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
     context.StartupSet.Add(startup);
     context.SaveChanges();
 
-    return Results.Created("Created",new BaseResponse("Startup Adicionada com Sucesso!!!"));
-});
+    return Results.Created("Created", new BaseResponse("Startup Adicionada com Sucesso!!!"));
+}).RequireAuthorization().WithTags("Startup");
 
 app.MapGet("startup/listar", (StartlyContext context) =>
 {
@@ -191,13 +263,13 @@ app.MapGet("startup/listar", (StartlyContext context) =>
             Imagem = i.Imagem,
             TipoImagem = i.TipoImagem,
         }).ToList(),
-        Contatos = x.Contatos.Select(c => new StartupContatoPesquisarDto 
+        Contatos = x.Contatos.Select(c => new StartupContatoPesquisarDto
         {
             Id = c.Id,
             Contato = c.Contato,
             StartupId = c.StartupId
         }).ToList(),
-        Videos = x.Videos.Select(v => new StartupVideoPesquisarDto 
+        Videos = x.Videos.Select(v => new StartupVideoPesquisarDto
         {
             Id = v.Id,
             StartupId = v.StartupId,
@@ -209,8 +281,8 @@ app.MapGet("startup/listar", (StartlyContext context) =>
     if (ListaStartup == null)
         return Results.NotFound(new BaseResponse("Não há Nenhuma Startup Criada!!!"));
 
-        return Results.Ok(ListaStartup);
-});
+    return Results.Ok(ListaStartup);
+}).RequireAuthorization().WithTags("Startup");
 
 app.MapGet("startup/obter/{id}", (StartlyContext context, Guid id) =>
 {
@@ -267,7 +339,7 @@ app.MapGet("startup/obter/{id}", (StartlyContext context, Guid id) =>
     };
 
     return Results.Ok(startupDto);
-});
+}).RequireAuthorization().WithTags("Startup");
 
 app.MapDelete("startup/remover/{id}", (StartlyContext context, Guid Id) =>
 {
@@ -282,7 +354,7 @@ app.MapDelete("startup/remover/{id}", (StartlyContext context, Guid Id) =>
     context.SaveChanges();
 
     return Results.Ok(new BaseResponse("Startup deletada com sucesso!!!"));
-});
+}).RequireAuthorization().WithTags("Startup");
 
 app.MapPut("startup/atualizar/{id}", (StartlyContext context, StartupAtualizarDto startupAtualizarDto) =>
 {
@@ -294,7 +366,7 @@ app.MapPut("startup/atualizar/{id}", (StartlyContext context, StartupAtualizarDt
         return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup De id {startupAtualizarDto.id}."));
     }
 
-    var startupDto = new StartupAtualizarDto 
+    var startupDto = new StartupAtualizarDto
     {
         Nome = startup.Nome,
         Descricao = startup.Descricao,
@@ -330,7 +402,38 @@ app.MapPut("startup/atualizar/{id}", (StartlyContext context, StartupAtualizarDt
     context.SaveChanges();
 
     return Results.Ok("Curso atualizado com sucesso");
-});
+}).RequireAuthorization().WithTags("Startup");
+#endregion
+
+#region EndPoint Autentica
+app.MapPost("autenticar", (StartlyContext context, autenticarDto autenticarDto) =>
+{
+    if (autenticarDto.Login == "Etec" && autenticarDto.Senha == "123")
+    {
+        var claims = new[]
+        {
+            new Claim("Nome",autenticarDto.Login)
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("" + "{b76ecac1-7f05-455b-a51d-0ef0500c8e4c}"));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: "startly",
+            audience: "startly",
+            claims: claims,
+            expires: DateTime.Now.AddDays(1),
+            signingCredentials: creds
+            );
+
+        return Results.Ok(new JwtSecurityTokenHandler()
+            .WriteToken(token));
+    }
+
+    return Results.BadRequest(new BaseResponse("Usuário ou Senha Incorretos"));
+}).WithTags("Autorização");
+
 #endregion
 
 app.Run();
