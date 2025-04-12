@@ -9,8 +9,10 @@ using Startly.Domain.DTOs.Startup.Adicionar;
 using Startly.Domain.DTOs.Startup.Atualizar;
 using Startly.Domain.DTOs.Startup.Pesquisar;
 using Startly.Domain.Entities;
+using Startly.Domain.Extensions;
 using Startly.Infra.Data.Context;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
 
@@ -192,7 +194,7 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
         EnumTipoDeAtendimento = startupAdicionarDto.EnumTipoDeAtendimento,
         ResponsavelCadastro = startupAdicionarDto.ResponsavelCadastro,
         Login = startupAdicionarDto.Login,
-        Senha = startupAdicionarDto.Senha,
+        Senha = startupAdicionarDto.Senha.EncryptPassword(),
         Atuacoes = startupAdicionarDto.Atuacoes.Select(a => new StartupAtuacao
         {
             Id = Guid.NewGuid(),
@@ -406,30 +408,30 @@ app.MapPut("startup/atualizar/{id}", (StartlyContext context, StartupAtualizarDt
 #region EndPoint Autentica
 app.MapPost("autenticar", (StartlyContext context, autenticarDto autenticarDto) =>
 {
-    if (autenticarDto.Login == "Etec" && autenticarDto.Senha == "123")
+    var startup = context.StartupSet.FirstOrDefault(p => p.Login == autenticarDto.Login && p.Senha == autenticarDto.Senha.EncryptPassword());
+    if (startup is null)
+        return Results.BadRequest(new BaseResponse("Usuário ou Senha Incorretos"));
+
+    var claims = new[]
     {
-        var claims = new[]
-        {
-            new Claim("Nome",autenticarDto.Login)
-        };
+        new Claim("Nome", startup.Nome),
+        new Claim("Senha", startup.Senha)
+    };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("" + "{b76ecac1-7f05-455b-a51d-0ef0500c8e4c}"));
+    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("" + "{b76ecac1-7f05-455b-a51d-0ef0500c8e4c}"));
 
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            issuer: "startly",
-            audience: "startly",
-            claims: claims,
-            expires: DateTime.Now.AddDays(1),
-            signingCredentials: creds
-            );
+    var token = new JwtSecurityToken(
+        issuer: "startly",
+        audience: "startly",
+        claims: claims,
+        expires: DateTime.Now.AddDays(1),
+        signingCredentials: creds
+    );
 
-        return Results.Ok(new JwtSecurityTokenHandler()
-            .WriteToken(token));
-    }
+    return Results.Ok(new JwtSecurityTokenHandler().WriteToken(token));
 
-    return Results.BadRequest(new BaseResponse("Usuário ou Senha Incorretos"));
 }).WithTags("Autorização");
 
 #endregion
