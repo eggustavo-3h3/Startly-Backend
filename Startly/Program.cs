@@ -61,6 +61,7 @@ builder.Services.AddSwaggerGen(config =>
 
 
 builder.Services.AddDbContext<StartlyContext>();
+builder.Services.AddCors();
 
 builder.Services.AddAuthentication(
     JwtBearerDefaults.AuthenticationScheme)
@@ -87,6 +88,7 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 
 app.UseHttpsRedirection();
@@ -282,7 +284,7 @@ app.MapGet("startup/listar", (StartlyContext context) =>
         return Results.NotFound(new BaseResponse("Não há Nenhuma Startup Criada!!!"));
 
     return Results.Ok(ListaStartup);
-}).RequireAuthorization().WithTags("Startup");
+}).WithTags("Startup");
 
 app.MapGet("startup/obter/{id}", (StartlyContext context, Guid id) =>
 {
