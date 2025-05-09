@@ -3,6 +3,7 @@
     public class StartupAtuacaoPesquisarDto
     {
         public Guid Id { get; set; }
+        public string? Descricao { get; set; }
         public Guid StartupId { get; set; }
         public Guid AtuacaoId { get; set; }
 

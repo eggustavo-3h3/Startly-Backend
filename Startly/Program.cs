@@ -105,7 +105,7 @@ app.MapGet("atuacao/listar", (StartlyContext context) =>
     }).ToList();
 
     return Results.Ok(listaAtuacaoDto);
-}).RequireAuthorization().WithTags("Atuação");
+}).WithTags("Atuação");
 
 app.MapGet("atuacao/obter/{Id}", (StartlyContext context, Guid Id) =>
 {
@@ -121,7 +121,7 @@ app.MapGet("atuacao/obter/{Id}", (StartlyContext context, Guid Id) =>
     };
 
     return Results.Ok(atuacaoDto);
-}).RequireAuthorization().WithTags("Atuação");
+}).WithTags("Atuação");
 
 app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto atuacaoDto) =>
 {
@@ -256,6 +256,7 @@ app.MapGet("startup/listar", (StartlyContext context) =>
         Atuacoes = x.Atuacoes.Select(a => new StartupAtuacaoPesquisarDto
         {
             Id = a.Id,
+            Descricao = a.Atuacao.Descricao,
             StartupId = a.StartupId,
             AtuacaoId = a.AtuacaoId
         }).ToList(),
