@@ -137,7 +137,6 @@ app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto at
     return Results.Created("Created", "Atuacao Registrada com Sucesso");
 }).RequireAuthorization().WithTags("Atuação");
 
-
 app.MapPut("atuacao/atualizar", (StartlyContext context, AtuacaoAtualizarDto atuacaoAtualizarDto) =>
 {
     var atuacao = context.AtuacaoSet.Find(atuacaoAtualizarDto.Id);
@@ -229,7 +228,7 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
     context.SaveChanges();
 
     return Results.Created("Created", new BaseResponse("Startup Adicionada com Sucesso!!!"));
-}).RequireAuthorization().WithTags("Startup");
+}).WithTags("Startup");
 
 app.MapGet("startup/listar", (StartlyContext context) =>
 {
