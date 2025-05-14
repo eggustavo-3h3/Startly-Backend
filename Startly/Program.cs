@@ -341,7 +341,7 @@ app.MapGet("startup/obter/{id}", (StartlyContext context, Guid id) =>
     };
 
     return Results.Ok(startupDto);
-}).RequireAuthorization().WithTags("Startup");
+}).WithTags("Startup");
 
 app.MapDelete("startup/remover/{id}", (StartlyContext context, Guid Id) =>
 {
