@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Startly.Domain.DTOs.Atuacao;
@@ -125,6 +126,11 @@ app.MapGet("atuacao/obter/{Id}", (StartlyContext context, Guid Id) =>
 
 app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto atuacaoDto) =>
 {
+    var resultado = new AtuacaoAdicionarDTOValidator().Validate(atuacaoDto);
+
+    if (!resultado.IsValid)
+       return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
+
     var atuacao = new Atuacao
     {
         Id = Guid.NewGuid(),
@@ -288,7 +294,11 @@ app.MapGet("startup/listar", (StartlyContext context) =>
 
 app.MapGet("startup/obter/{id}", (StartlyContext context, Guid id) =>
 {
-    var startup = context.StartupSet.Find(id);
+    var startup = context.StartupSet
+    .Include(p => p.Imagens)
+    .Include(p => p.Contatos)
+    .Include(p => p.Videos)
+    .FirstOrDefault(p => p.Id == id);
 
     if (startup == null)
     {
@@ -317,6 +327,7 @@ app.MapGet("startup/obter/{id}", (StartlyContext context, Guid id) =>
         {
             Id = a.Id,
             StartupId = a.StartupId,
+            Descricao = a.Atuacao.Descricao,
             AtuacaoId = a.AtuacaoId
         }).ToList(),
         Imagens = startup.Imagens.Select(i => new StartupImagemPesquisarDto
