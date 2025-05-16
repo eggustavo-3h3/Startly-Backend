@@ -126,7 +126,7 @@ app.MapGet("atuacao/obter/{Id}", (StartlyContext context, Guid Id) =>
 
 app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto atuacaoDto) =>
 {
-    var resultado = new AtuacaoAdicionarDTOValidator().Validate(atuacaoDto);
+    var resultado = new AtuacaoAdicionarDtoValidator().Validate(atuacaoDto);
 
     if (!resultado.IsValid)
        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
@@ -145,7 +145,11 @@ app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto at
 
 app.MapPut("atuacao/atualizar", (StartlyContext context, AtuacaoAtualizarDto atuacaoAtualizarDto) =>
 {
+    var resultado = new AtuacaoAtualizarDtoValidator().Validate(atuacaoAtualizarDto);
     var atuacao = context.AtuacaoSet.Find(atuacaoAtualizarDto.Id);
+
+    if (!resultado.IsValid)
+        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
 
     if (atuacao == null)
         return Results.NotFound($"Atucação com ID {atuacaoAtualizarDto.Id} não encontrada.");

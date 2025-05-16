@@ -2,9 +2,9 @@
 
 namespace Startly.Domain.DTOs.Atuacao
 {
-    public class AtuacaoAdicionarDtoValidator : AbstractValidator<AtuacaoAdicionarDto>
+    public class AtuacaoAtualizarDtoValidator : AbstractValidator<AtuacaoAtualizarDto>
     {
-        public AtuacaoAdicionarDtoValidator()
+        public AtuacaoAtualizarDtoValidator()
         {
             RuleFor(p => p.Descricao)
                 .NotEmpty().WithMessage("Descrição deve ser preenchida Obrigatoriamente")

@@ -51,8 +51,8 @@ namespace Startly.Infra.Data.Configurations
                 .HasMaxLength(2);
 
             builder.Property(p => p.SiteStartup)
-                .IsRequired()
-                .HasMaxLength(250);
+                .IsRequired(false)
+                .HasMaxLength(500);
 
             builder.Property(p => p.QuantidadeFuncionario)
                 .IsRequired();
@@ -71,7 +71,7 @@ namespace Startly.Infra.Data.Configurations
 
             builder.Property(p => p.Login)
                  .IsRequired()
-                 .HasMaxLength(30);
+                 .HasMaxLength(100);
 
             builder.Property(p => p.Senha)
                  .IsRequired();
