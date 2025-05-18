@@ -179,8 +179,10 @@ app.MapDelete("atuacao/remover/{Id}", (StartlyContext context, Guid Id) =>
 #region Endpoint Startup
 app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto startupAdicionarDto) =>
 {
-    if (startupAdicionarDto.Senha != startupAdicionarDto.ConfirmarSenha)
-        return Results.BadRequest(new BaseResponse("Senhas não Conferem!!!"));
+    var resultado = new StartupAdicionarDtoValidator().Validate(startupAdicionarDto);
+
+    if (!resultado.IsValid)
+        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
 
 
 
@@ -375,6 +377,11 @@ app.MapDelete("startup/remover/{id}", (StartlyContext context, Guid Id) =>
 
 app.MapPut("startup/atualizar/{id}", (StartlyContext context, StartupAtualizarDto startupAtualizarDto) =>
 {
+    var resultado = new StartupAtualizarDtoValidator().Validate(startupAtualizarDto);
+
+    if (!resultado.IsValid)
+        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
+
 
     var startup = context.StartupSet.Find(startupAtualizarDto.id);
 
