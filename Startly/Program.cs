@@ -301,6 +301,7 @@ app.MapGet("startup/listar", (StartlyContext context) =>
 app.MapGet("startup/obter/{id}", (StartlyContext context, Guid id) =>
 {
     var startup = context.StartupSet
+    .Include(p => p.Atuacoes).ThenInclude(p => p.Atuacao)
     .Include(p => p.Imagens)
     .Include(p => p.Contatos)
     .Include(p => p.Videos)
