@@ -1,6 +1,6 @@
 ﻿namespace Startly.Domain.DTOs.Login
 {
-    public class autenticarDto
+    public class AutenticarDto
     {
         public string Login { get; set; } = string.Empty;
 

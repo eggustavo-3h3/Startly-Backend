@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Startly.Migrations
 {
     /// <inheritdoc />
-    public partial class Renomeacao_Das_Tabelas : Migration
+    public partial class Inicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,7 +37,7 @@ namespace Startly.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Descricao = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    metas = table.Column<string>(type: "varchar(3000)", maxLength: 3000, nullable: false)
+                    Metas = table.Column<string>(type: "varchar(3000)", maxLength: 3000, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CNPJ = table.Column<string>(type: "varchar(14)", maxLength: 14, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -53,7 +53,7 @@ namespace Startly.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UF = table.Column<string>(type: "varchar(2)", maxLength: 2, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    SiteStartup = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false)
+                    SiteStartup = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     QuantidadeFuncionario = table.Column<int>(type: "int", nullable: false),
                     EnumTicket = table.Column<string>(type: "longtext", nullable: false)
@@ -62,7 +62,7 @@ namespace Startly.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ResponsavelCadastro = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Login = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false)
+                    Login = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Senha = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -151,7 +151,7 @@ namespace Startly.Migrations
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StartupId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    LinkVideo = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                    LinkVideo = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>

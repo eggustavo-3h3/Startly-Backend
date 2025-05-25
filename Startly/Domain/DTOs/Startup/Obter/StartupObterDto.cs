@@ -1,10 +1,8 @@
-﻿using Startly.Domain.DTOs.Startup.Atualizar;
-using Startly.Domain.Entities;
-using Startly.Enumerators;
+﻿using Startly.Enumerators;
 
-namespace Startly.Domain.DTOs.Startup.Pesquisar
+namespace Startly.Domain.DTOs.Startup.Obter
 {
-    public class StartupPesquisarDto
+    public class StartupObterDto
     {
         public Guid Id { get; set; }
         public string Nome { get; set; } = string.Empty;
@@ -22,11 +20,10 @@ namespace Startly.Domain.DTOs.Startup.Pesquisar
         public EnumTicketMedio EnumTicket { get; set; }
         public EnumTipoDeAtendimento EnumTipoDeAtendimento { get; set; }
         public string ResponsavelCadastro { get; set; } = string.Empty;
-
-        public List<StartupAtuacaoPesquisarDto> Atuacoes { get; set; } = [];
-        public List<StartupVideoPesquisarDto> Videos { get; set; } = [];
-        public List<StartupImagemPesquisarDto> Imagens { get; set; } = [];
-        public List<StartupContatoPesquisarDto> Contatos { get; set; } = [];
+        public List<StartupAtuacaoObterDto> Atuacoes { get; set; } = [];
+        public List<StartupVideoObterDto> Videos { get; set; } = [];
+        public List<StartupImagemObterDto> Imagens { get; set; } = [];
+        public List<StartupContatoObterDto> Contatos { get; set; } = [];
 
     }
 }

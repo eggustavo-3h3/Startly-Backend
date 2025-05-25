@@ -22,6 +22,7 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
         public string Login { get; set; } = string.Empty;
         public string Senha { get; set; } = string.Empty;
         public string ConfirmarSenha { get; set; } = string.Empty;
+        public string Logo { get; set; } = string.Empty;
         public List<StartupAtuacaoAdicionarDto> Atuacoes { get; set; } = [];
         public List<StartupVideoAdicionarDto> Videos { get; set; } = [];
         public List<StartupImagemAdicionarDto> Imagens { get; set; } = [];

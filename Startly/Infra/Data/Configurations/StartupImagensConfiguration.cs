@@ -14,14 +14,10 @@ namespace Startly.Infra.Data.Configurations
             builder.Property(i => i.StartupId)
                .IsRequired();
 
-            builder.Property(i => i.TipoImagem)
-                .HasConversion<string>()
+            builder.Property(i => i.Imagem)
                 .IsRequired();
-
-            builder.Property(i => i.Imagem);
 
             builder.ToTable("TB_StartupImagens");
         }
     }
 }
-

@@ -23,6 +23,8 @@ namespace Startly.Domain.DTOs.Startup.Atualizar
             RuleFor(p => p.EnumTipoDeAtendimento)
                 .NotEmpty().WithMessage("O campo Tipo de Atendimento não pode estar vázio");
 
+            RuleFor(p => p.Logo)
+                .NotEmpty().WithMessage("O campo Logo não pode estar vazio");
         }
     }
 }

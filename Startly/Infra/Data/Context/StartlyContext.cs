@@ -10,7 +10,7 @@ namespace Startly.Infra.Data.Context
         public DbSet<StartupAtuacao> StartupAtuacaoSet { get; set; }
         public DbSet<StartupVideo> StartupVideoSet { get; set; }
         public DbSet<StartupContato> StartupContatoSet { get; set; }
-        public DbSet<StartupImagem> StartupImagensSet { get; set; }
+        public DbSet<StartupImagem> StartupImagemSet { get; set; }
         public DbSet<Atuacao> AtuacaoSet { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

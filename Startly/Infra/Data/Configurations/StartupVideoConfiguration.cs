@@ -11,8 +11,7 @@ namespace Startly.Infra.Data.Configurations
             builder.HasKey(v => v.Id);
 
             builder.Property(v => v.LinkVideo)
-                .IsRequired()
-                .HasMaxLength(200);
+                .IsRequired();
 
             builder.Property(v => v.StartupId)
                 .IsRequired();

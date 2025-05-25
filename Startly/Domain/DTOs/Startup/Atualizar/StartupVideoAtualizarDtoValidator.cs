@@ -6,8 +6,8 @@ namespace Startly.Domain.DTOs.Startup.Atualizar
     {
         public StartupVideoAtualizarDtoValidator()
         {
-          RuleFor(p => p.LinkVideo)
-             .MaximumLength(200).WithMessage("O campo Video deve ter no máximo 200 caracteres");
+            RuleFor(p => p.LinkVideo)
+                .NotEmpty().WithMessage("O campo LinkVideo não pode estar vazio");
         }
     }
 }

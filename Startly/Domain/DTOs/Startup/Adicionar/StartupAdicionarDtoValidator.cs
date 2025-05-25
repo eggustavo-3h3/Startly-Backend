@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using System.Data;
 
 namespace Startly.Domain.DTOs.Startup.Adicionar
 {
@@ -68,6 +67,9 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
 
             RuleFor(p => p.ConfirmarSenha)
                 .Equal(p => p.Senha).WithMessage("As senhas não coincidem");
+
+            RuleFor(p => p.Logo)
+                .NotEmpty().WithMessage("O campo Logo não pode estar vazio");
 
             RuleFor(p => p.Atuacoes)
                 .NotEmpty().WithMessage("O campo de Atuação não pode estar vázio");

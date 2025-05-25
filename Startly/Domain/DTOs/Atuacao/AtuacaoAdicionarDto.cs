@@ -3,6 +3,5 @@
     public class AtuacaoAdicionarDto
     {
         public string Descricao { get; set; } = string.Empty;
-
     }
 }

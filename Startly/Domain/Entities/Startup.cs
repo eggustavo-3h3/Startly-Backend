@@ -22,6 +22,7 @@ namespace Startly.Domain.Entities
         public string ResponsavelCadastro { get; set; } = string.Empty;
         public string Login { get; set; } = string.Empty;
         public string Senha { get; set; } = string.Empty;
+        public string Logo { get; set; } = string.Empty;
         public ICollection<StartupAtuacao> Atuacoes { get; set; } = [];
         public ICollection<StartupImagem> Imagens { get; set; } = [];
         public ICollection<StartupContato> Contatos { get; set; } = [];

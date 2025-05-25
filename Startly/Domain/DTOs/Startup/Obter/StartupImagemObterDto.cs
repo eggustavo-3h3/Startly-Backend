@@ -1,8 +1,8 @@
 ﻿using Startly.Enumerators;
 
-namespace Startly.Domain.DTOs.Startup.Adicionar
+namespace Startly.Domain.DTOs.Startup.Obter
 {
-    public class StartupImagemAdicionarDto
+    public class StartupImagemObterDto
     {
         public string Imagem { get; set; } = string.Empty;
     }

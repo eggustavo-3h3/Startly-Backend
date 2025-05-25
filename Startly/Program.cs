@@ -8,14 +8,15 @@ using Startly.Domain.DTOs.Base;
 using Startly.Domain.DTOs.Login;
 using Startly.Domain.DTOs.Startup.Adicionar;
 using Startly.Domain.DTOs.Startup.Atualizar;
-using Startly.Domain.DTOs.Startup.Pesquisar;
 using Startly.Domain.Entities;
 using Startly.Domain.Extensions;
 using Startly.Infra.Data.Context;
 using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Identity.Client;
+using Startly.Domain.DTOs.Startup.Listar;
+using Startly.Domain.DTOs.Startup.Obter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,7 +84,11 @@ builder.Services.AddAuthentication(
     });
 
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("User", policy => policy.RequireRole("User", "Admin"));
+});
 
 var app = builder.Build();
 
@@ -91,10 +96,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-
 app.UseHttpsRedirection();
 
-//controller Atuação
 #region Endpoint Atuacao
 
 app.MapGet("atuacao/listar", (StartlyContext context) =>
@@ -103,17 +106,17 @@ app.MapGet("atuacao/listar", (StartlyContext context) =>
     {
         Id = x.Id,
         Descricao = x.Descricao,
-    }).ToList();
+    }).OrderBy(p => p.Descricao).ToList();
 
     return Results.Ok(listaAtuacaoDto);
 }).WithTags("Atuação");
 
-app.MapGet("atuacao/obter/{Id}", (StartlyContext context, Guid Id) =>
+app.MapGet("atuacao/obter/{id:guid}", (StartlyContext context, Guid id) =>
 {
-    var atuacao = context.AtuacaoSet.Find(Id);
+    var atuacao = context.AtuacaoSet.Find(id);
 
     if (atuacao == null)
-        return Results.NotFound($"Startup com ID {Id} não encontrada.");
+        return Results.NotFound($"Startup com ID {id} não encontrada.");
 
     var atuacaoDto = new AtuacaoObterDto
     {
@@ -141,7 +144,7 @@ app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto at
     context.SaveChanges();
 
     return Results.Created("Created", "Atuacao Registrada com Sucesso");
-}).RequireAuthorization().WithTags("Atuação");
+}).RequireAuthorization("Admin").WithTags("Atuação");
 
 app.MapPut("atuacao/atualizar", (StartlyContext context, AtuacaoAtualizarDto atuacaoAtualizarDto) =>
 {
@@ -159,32 +162,102 @@ app.MapPut("atuacao/atualizar", (StartlyContext context, AtuacaoAtualizarDto atu
     context.SaveChanges();
 
     return Results.Ok("Atuação atualizada com sucesso");
-}).RequireAuthorization().WithTags("Atuação");
+}).RequireAuthorization("Admin").WithTags("Atuação");
 
-app.MapDelete("atuacao/remover/{Id}", (StartlyContext context, Guid Id) =>
+app.MapDelete("atuacao/remover/{id:guid}", (StartlyContext context, Guid id) =>
 {
-    var atuacao = context.AtuacaoSet.Find(Id);
+    var atuacao = context.AtuacaoSet.Find(id);
 
     if (atuacao == null)
-        return Results.NotFound($"Atuação com ID {Id} não encontrada.");
+        return Results.NotFound($"Atuação com ID {id} não encontrada.");
 
     context.AtuacaoSet.Remove(atuacao);
     context.SaveChanges();
     return Results.Ok("Atuacao removida com sucesso");
-}).RequireAuthorization().WithTags("Atuação");
+}).RequireAuthorization("Admin").WithTags("Atuação");
 
 #endregion
 
-//controller Startup
 #region Endpoint Startup
+
+app.MapGet("startup/listar", (StartlyContext context) =>
+{
+    var listaStartup = context.StartupSet.Select(x => new StartupListarDto
+    {
+        Id = x.Id,
+        Nome = x.Nome,
+        Descricao = x.Descricao,
+        Atuacoes = x.Atuacoes.Select(a => new StartupAtuacaoListarDto
+        {
+            Descricao = a.Atuacao.Descricao
+        }).ToList(),
+        Imagens = x.Imagens.Select(i => new StartupImagemListarDto
+        {
+            Imagem = i.Imagem
+        }).ToList()
+    }).ToList();
+
+    return listaStartup.Count == 0 ? Results.NotFound(new BaseResponse("Não há Nenhuma Startup Criada!!!")) : Results.Ok(listaStartup);
+}).WithTags("Startup");
+
+app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
+{
+    var startup = context.StartupSet
+        .Include(p => p.Atuacoes).ThenInclude(atuacoes => atuacoes.Atuacao)
+        .Include(p => p.Imagens)
+        .Include(p => p.Contatos)
+        .Include(p => p.Videos)
+        .FirstOrDefault(p => p.Id == id);
+
+    if (startup == null)
+        return Results.NotFound($"Startup com ID {id} não encontrada.");
+
+    var startupDto = new StartupObterDto
+    {
+        Id = startup.Id,
+        Nome = startup.Nome,
+        Descricao = startup.Descricao,
+        Metas = startup.Metas,
+        CNPJ = startup.CNPJ,
+        Cep = startup.Cep,
+        Logradouro = startup.Logradouro,
+        Numero = startup.Numero,
+        Bairro = startup.Bairro,
+        Municipio = startup.Municipio,
+        UF = startup.UF,
+        SiteStartup = startup.SiteStartup,
+        QuantidadeFuncionario = startup.QuantidadeFuncionario,
+        EnumTicket = startup.EnumTicket,
+        EnumTipoDeAtendimento = startup.EnumTipoDeAtendimento,
+        ResponsavelCadastro = startup.ResponsavelCadastro,
+        Atuacoes = startup.Atuacoes.Select(a => new StartupAtuacaoObterDto
+        {
+            Descricao = a.Atuacao.Descricao
+        }).ToList(),
+        Imagens = startup.Imagens.Select(i => new StartupImagemObterDto
+        {
+            Imagem = i.Imagem
+        }).ToList(),
+        Contatos = startup.Contatos.Select(c => new StartupContatoObterDto
+        {
+            TipoContato = c.Contato,
+            Conteudo = c.Conteudo
+        }).ToList(),
+        Videos = startup.Videos.Select(v => new StartupVideoObterDto
+        {
+            LinkVideo = v.LinkVideo,
+        }).ToList(),
+    };
+
+    return Results.Ok(startupDto);
+}).WithTags("Startup");
+
 app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto startupAdicionarDto) =>
 {
     var resultado = new StartupAdicionarDtoValidator().Validate(startupAdicionarDto);
 
     if (!resultado.IsValid)
         return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
-
-
 
     var idStartup = Guid.NewGuid();
 
@@ -208,6 +281,7 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
         ResponsavelCadastro = startupAdicionarDto.ResponsavelCadastro,
         Login = startupAdicionarDto.Login,
         Senha = startupAdicionarDto.Senha.EncryptPassword(),
+        Logo = startupAdicionarDto.Logo,
         Atuacoes = startupAdicionarDto.Atuacoes.Select(a => new StartupAtuacao
         {
             Id = Guid.NewGuid(),
@@ -218,7 +292,6 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
         {
             Id = Guid.NewGuid(),
             StartupId = idStartup,
-            TipoImagem = i.TipoImagem,
             Imagem = i.Imagem
         }).ToList(),
         Contatos = startupAdicionarDto.Contatos.Select(c => new StartupContato
@@ -242,133 +315,89 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
     return Results.Created("Created", new BaseResponse("Startup Adicionada com Sucesso!!!"));
 }).WithTags("Startup");
 
-app.MapGet("startup/listar", (StartlyContext context) =>
+app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto startupAtualizarDto) =>
 {
+    var resultado = new StartupAtualizarDtoValidator().Validate(startupAtualizarDto);
 
-    var ListaStartup = context.StartupSet.Select(x => new StartupPesquisarDto
-    {
+    if (!resultado.IsValid)
+        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
 
-        Id = x.Id,
-        Nome = x.Nome,
-        Descricao = x.Descricao,
-        Metas = x.Metas,
-        CNPJ = x.CNPJ,
-        Cep = x.Cep,
-        Logradouro = x.Logradouro,
-        Numero = x.Numero,
-        Bairro = x.Bairro,
-        Municipio = x.Municipio,
-        UF = x.UF,
-        SiteStartup = x.SiteStartup,
-        QuantidadeFuncionario = x.QuantidadeFuncionario,
-        EnumTicket = x.EnumTicket,
-        EnumTipoDeAtendimento = x.EnumTipoDeAtendimento,
-        ResponsavelCadastro = x.ResponsavelCadastro,
-        Atuacoes = x.Atuacoes.Select(a => new StartupAtuacaoPesquisarDto
-        {
-            Id = a.Id,
-            Descricao = a.Atuacao.Descricao,
-            StartupId = a.StartupId,
-            AtuacaoId = a.AtuacaoId
-        }).ToList(),
-        Imagens = x.Imagens.Select(i => new StartupImagemPesquisarDto
-        {
-            id = i.Id,
-            Imagem = i.Imagem,
-            TipoImagem = i.TipoImagem,
-        }).ToList(),
-        Contatos = x.Contatos.Select(c => new StartupContatoPesquisarDto
-        {
-            Id = c.Id,
-            Contato = c.Contato,
-            StartupId = c.StartupId
-        }).ToList(),
-        Videos = x.Videos.Select(v => new StartupVideoPesquisarDto
-        {
-            Id = v.Id,
-            StartupId = v.StartupId,
-            LinkVideo = v.LinkVideo,
-        }).ToList(),
-
-    }).ToList();
-
-    if (ListaStartup == null)
-        return Results.NotFound(new BaseResponse("Não há Nenhuma Startup Criada!!!"));
-
-    return Results.Ok(ListaStartup);
-}).WithTags("Startup");
-
-app.MapGet("startup/obter/{id}", (StartlyContext context, Guid id) =>
-{
     var startup = context.StartupSet
-    .Include(p => p.Atuacoes).ThenInclude(p => p.Atuacao)
-    .Include(p => p.Imagens)
-    .Include(p => p.Contatos)
-    .Include(p => p.Videos)
-    .FirstOrDefault(p => p.Id == id);
+        .Include(p => p.Atuacoes)
+        .Include(p => p.Imagens)
+        .Include(p => p.Contatos)
+        .Include(p => p.Videos)
+        .FirstOrDefault(p => p.Id == startupAtualizarDto.Id);
 
     if (startup == null)
+        return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup de Id: {startupAtualizarDto.Id}."));
+
+    startup.Videos.ToList().ForEach(startupVideo => context.StartupVideoSet.Remove(startupVideo));
+    startup.Contatos.ToList().ForEach(startupContato => context.StartupContatoSet.Remove(startupContato));
+    startup.Imagens.ToList().ForEach(startupImagem => context.StartupImagemSet.Remove(startupImagem));
+    startup.Atuacoes.ToList().ForEach(startupAtuacao => context.StartupAtuacaoSet.Remove(startupAtuacao));
+
+    //Atualizando dados
+    startup.Nome = startupAtualizarDto.Nome;
+    startup.Descricao = startupAtualizarDto.Descricao;
+    startup.Metas = startupAtualizarDto.Metas;
+    startup.QuantidadeFuncionario = startupAtualizarDto.QuantidadeFuncionario;
+    startup.EnumTicket = startupAtualizarDto.EnumTicket;
+    startup.Logo = startupAtualizarDto.Logo;
+
+    startupAtualizarDto.Atuacoes.ForEach(atuacao =>
     {
-        return Results.NotFound($"Startup com ID {id} não encontrada.");
-    }
+        startup.Atuacoes.Add(new StartupAtuacao
+        {
+            Id = Guid.NewGuid(),
+            StartupId = startup.Id,
+            AtuacaoId = atuacao.AtuacaoId
+        });
+    });
 
-    var startupDto = new StartupPesquisarDto
+    startupAtualizarDto.Imagens.ForEach(imagem =>
     {
-        Id = startup.Id,
-        Nome = startup.Nome,
-        Descricao = startup.Descricao,
-        Metas = startup.Metas,
-        CNPJ = startup.CNPJ,
-        Cep = startup.Cep,
-        Logradouro = startup.Logradouro,
-        Numero = startup.Numero,
-        Bairro = startup.Bairro,
-        Municipio = startup.Municipio,
-        UF = startup.UF,
-        SiteStartup = startup.SiteStartup,
-        QuantidadeFuncionario = startup.QuantidadeFuncionario,
-        EnumTicket = startup.EnumTicket,
-        EnumTipoDeAtendimento = startup.EnumTipoDeAtendimento,
-        ResponsavelCadastro = startup.ResponsavelCadastro,
-        Atuacoes = startup.Atuacoes.Select(a => new StartupAtuacaoPesquisarDto
+        startup.Imagens.Add(new StartupImagem
         {
-            Id = a.Id,
-            StartupId = a.StartupId,
-            Descricao = a.Atuacao.Descricao,
-            AtuacaoId = a.AtuacaoId
-        }).ToList(),
-        Imagens = startup.Imagens.Select(i => new StartupImagemPesquisarDto
-        {
-            id = i.Id,
-            Imagem = i.Imagem,
-            TipoImagem = i.TipoImagem,
-        }).ToList(),
-        Contatos = startup.Contatos.Select(c => new StartupContatoPesquisarDto
-        {
-            Id = c.Id,
-            Contato = c.Contato,
-            StartupId = c.StartupId
-        }).ToList(),
-        Videos = startup.Videos.Select(v => new StartupVideoPesquisarDto
-        {
-            Id = v.Id,
-            StartupId = v.StartupId,
-            LinkVideo = v.LinkVideo,
-        }).ToList(),
+            Id = Guid.NewGuid(),
+            StartupId = startup.Id,
+            Imagem = imagem.Imagem
+        });
+    });
 
-    };
+    startupAtualizarDto.Contatos.ForEach(contato =>
+    {
+        startup.Contatos.Add(new StartupContato
+        {
+            Id = Guid.NewGuid(),
+            StartupId = startup.Id,
+            Contato = contato.Contato,
+            Conteudo = contato.Conteudo
+        });
+    });
 
-    return Results.Ok(startupDto);
-}).WithTags("Startup");
+    startupAtualizarDto.Videos.ForEach(video =>
+    {
+        startup.Videos.Add(new StartupVideo
+        {
+            Id = Guid.NewGuid(),
+            StartupId = startup.Id,
+            LinkVideo = video.LinkVideo
+        });
+    });
 
-app.MapDelete("startup/remover/{id}", (StartlyContext context, Guid Id) =>
+    context.StartupSet.Update(startup);
+    context.SaveChanges();
+
+    return Results.Ok("Curso atualizado com sucesso");
+}).RequireAuthorization().WithTags("Startup");
+
+app.MapDelete("startup/remover/{id:guid}", (StartlyContext context, Guid id) =>
 {
-    var startup = context.StartupSet.Find(Id);
+    var startup = context.StartupSet.Find(id);
 
     if (startup == null)
-    {
-        return Results.NotFound(new BaseResponse($"Startup com ID {Id} não encontrada."));
-    }
+        return Results.NotFound(new BaseResponse($"Startup com ID {id} não encontrada."));
 
     context.StartupSet.Remove(startup);
     context.SaveChanges();
@@ -376,62 +405,11 @@ app.MapDelete("startup/remover/{id}", (StartlyContext context, Guid Id) =>
     return Results.Ok(new BaseResponse("Startup deletada com sucesso!!!"));
 }).RequireAuthorization().WithTags("Startup");
 
-app.MapPut("startup/atualizar/{id}", (StartlyContext context, StartupAtualizarDto startupAtualizarDto) =>
-{
-    var resultado = new StartupAtualizarDtoValidator().Validate(startupAtualizarDto);
-
-    if (!resultado.IsValid)
-        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
-
-
-    var startup = context.StartupSet.Find(startupAtualizarDto.id);
-
-    if (startup == null)
-    {
-        return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup De id {startupAtualizarDto.id}."));
-    }
-
-    var startupDto = new StartupAtualizarDto
-    {
-        Nome = startup.Nome,
-        Descricao = startup.Descricao,
-        metas = startup.Metas,
-        QuantidadeFuncionario = startup.QuantidadeFuncionario,
-        EnumTicket = startup.EnumTicket,
-        EnumTipoDeAtendimento = startup.EnumTipoDeAtendimento,
-        Atuacoes = startup.Atuacoes.Select(a => new StartupAtuacaoAtualizarDto
-        {
-            StartupId = a.StartupId,
-            AtuacaoId = a.AtuacaoId
-        }).ToList(),
-        Imagens = startup.Imagens.Select(i => new StartupImagemAtualizarDto
-        {
-            StartupId = i.StartupId,
-            Imagem = i.Imagem,
-            TipoImagem = i.TipoImagem,
-        }).ToList(),
-        Contatos = startup.Contatos.Select(c => new StartupContatoAtualizarDto
-        {
-            Contato = c.Contato,
-            StartupId = c.StartupId
-        }).ToList(),
-        Videos = startup.Videos.Select(v => new StartupVideoAtualizarDto
-        {
-            StartupId = v.StartupId,
-            LinkVideo = v.LinkVideo,
-        }).ToList(),
-
-    };
-
-    context.StartupSet.Update(startup);
-    context.SaveChanges();
-
-    return Results.Ok("Curso atualizado com sucesso");
-}).RequireAuthorization().WithTags("Startup");
 #endregion
 
-#region EndPoint Autentica
-app.MapPost("autenticar", (StartlyContext context, autenticarDto autenticarDto) =>
+#region EndPoint Autenticar
+
+app.MapPost("autenticar", (StartlyContext context, AutenticarDto autenticarDto) =>
 {
     var startup = context.StartupSet.FirstOrDefault(p => p.Login == autenticarDto.Login && p.Senha == autenticarDto.Senha.EncryptPassword());
     if (startup is null)
@@ -440,7 +418,8 @@ app.MapPost("autenticar", (StartlyContext context, autenticarDto autenticarDto) 
     var claims = new[]
     {
         new Claim("Nome", startup.Nome),
-        new Claim("Senha", startup.Senha)
+        new Claim("Senha", startup.Senha),
+        new Claim(ClaimTypes.Role, "Admin")
     };
 
     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("" + "{b76ecac1-7f05-455b-a51d-0ef0500c8e4c}"));
@@ -462,4 +441,3 @@ app.MapPost("autenticar", (StartlyContext context, autenticarDto autenticarDto) 
 #endregion
 
 app.Run();
-

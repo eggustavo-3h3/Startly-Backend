@@ -12,8 +12,8 @@ using Startly.Infra.Data.Context;
 namespace Startly.Migrations
 {
     [DbContext(typeof(StartlyContext))]
-    [Migration("20250308010004_Renomeacao_Das_Tabelas")]
-    partial class Renomeacao_Das_Tabelas
+    [Migration("20250524190010_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,13 +76,18 @@ namespace Startly.Migrations
 
                     b.Property<string>("Login")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Logradouro")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Metas")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("varchar(3000)");
 
                     b.Property<string>("Municipio")
                         .IsRequired()
@@ -112,19 +117,13 @@ namespace Startly.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("SiteStartup")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("UF")
                         .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("varchar(2)");
-
-                    b.Property<string>("metas")
-                        .IsRequired()
-                        .HasMaxLength(3000)
-                        .HasColumnType("varchar(3000)");
 
                     b.HasKey("Id");
 
@@ -209,8 +208,7 @@ namespace Startly.Migrations
 
                     b.Property<string>("LinkVideo")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("StartupId")
                         .HasColumnType("char(36)");
