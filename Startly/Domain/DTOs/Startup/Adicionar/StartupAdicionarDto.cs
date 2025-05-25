@@ -16,8 +16,8 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
         public string UF { get; set; } = string.Empty;
         public string? SiteStartup { get; set; }
         public int QuantidadeFuncionario { get; set; }
-        public EnumTicketMedio EnumTicket { get; set; }
-        public EnumTipoDeAtendimento EnumTipoDeAtendimento { get; set; }
+        public EnumTicketMedio TicketMedio { get; set; }
+        public EnumTipoDeAtendimento TipoAtendimento { get; set; }
         public string ResponsavelCadastro { get; set; } = string.Empty;
         public string Login { get; set; } = string.Empty;
         public string Senha { get; set; } = string.Empty;

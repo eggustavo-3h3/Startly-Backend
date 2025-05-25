@@ -276,8 +276,8 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
         UF = startupAdicionarDto.UF,
         SiteStartup = startupAdicionarDto.SiteStartup,
         QuantidadeFuncionario = startupAdicionarDto.QuantidadeFuncionario,
-        EnumTicket = startupAdicionarDto.EnumTicket,
-        EnumTipoDeAtendimento = startupAdicionarDto.EnumTipoDeAtendimento,
+        EnumTicket = startupAdicionarDto.TicketMedio,
+        EnumTipoDeAtendimento = startupAdicionarDto.TipoAtendimento,
         ResponsavelCadastro = startupAdicionarDto.ResponsavelCadastro,
         Login = startupAdicionarDto.Login,
         Senha = startupAdicionarDto.Senha.EncryptPassword(),
@@ -342,7 +342,7 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
     startup.Descricao = startupAtualizarDto.Descricao;
     startup.Metas = startupAtualizarDto.Metas;
     startup.QuantidadeFuncionario = startupAtualizarDto.QuantidadeFuncionario;
-    startup.EnumTicket = startupAtualizarDto.EnumTicket;
+    startup.EnumTicket = startupAtualizarDto.TicketMedio;
     startup.Logo = startupAtualizarDto.Logo;
 
     startupAtualizarDto.Atuacoes.ForEach(atuacao =>

@@ -23,7 +23,7 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
 
             RuleFor(p => p.Cep)
                 .NotEmpty().WithMessage("O campo Cep não pode estar vázio")
-                .MaximumLength(9).WithMessage("O campo Cep deve ter no Máximo 0 caracteres")
+                .MaximumLength(9).WithMessage("O campo Cep deve ter no Máximo 9 caracteres")
                 .Matches("^\\d{5}-\\d{3}$").WithMessage("Cep Inválido");
                 
             RuleFor(p => p.Logradouro)
@@ -52,10 +52,10 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
             RuleFor(p => p.QuantidadeFuncionario)
                  .NotEmpty().WithMessage("O campo Cep não pode estar vázio");
 
-            RuleFor(p => p.EnumTicket)
+            RuleFor(p => p.TicketMedio)
                 .NotEmpty().WithMessage("O campo de Ticket Médio não pode estar Vázio");
 
-            RuleFor(p => p.EnumTipoDeAtendimento)
+            RuleFor(p => p.TipoAtendimento)
                 .NotEmpty().WithMessage("O campo Tipo de Atendimento não pode estar vázio");
 
             RuleFor(p => p.ResponsavelCadastro)

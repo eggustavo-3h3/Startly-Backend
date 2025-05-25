@@ -17,10 +17,10 @@ namespace Startly.Domain.DTOs.Startup.Atualizar
             RuleFor(p => p.QuantidadeFuncionario)
                  .NotEmpty().WithMessage("O campo Cep não pode estar vázio");
 
-            RuleFor(p => p.EnumTicket)
+            RuleFor(p => p.TicketMedio)
                 .NotEmpty().WithMessage("O campo de Ticket Médio não pode estar Vázio");
 
-            RuleFor(p => p.EnumTipoDeAtendimento)
+            RuleFor(p => p.TipoAtendimento)
                 .NotEmpty().WithMessage("O campo Tipo de Atendimento não pode estar vázio");
 
             RuleFor(p => p.Logo)
