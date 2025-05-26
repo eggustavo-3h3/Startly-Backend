@@ -15,8 +15,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Identity.Client;
+using Startly.Domain.DTOs.AlterarSenha;
 using Startly.Domain.DTOs.Startup.Listar;
 using Startly.Domain.DTOs.Startup.Obter;
+using Startly.Enumerators;
+using Startly.Infra.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -417,6 +420,7 @@ app.MapPost("autenticar", (StartlyContext context, AutenticarDto autenticarDto) 
 
     var claims = new[]
     {
+        new Claim("Id", startup.Id.ToString()),
         new Claim("Nome", startup.Nome),
         new Claim("Senha", startup.Senha),
         new Claim(ClaimTypes.Role, "Admin")
@@ -436,7 +440,59 @@ app.MapPost("autenticar", (StartlyContext context, AutenticarDto autenticarDto) 
 
     return Results.Ok(new JwtSecurityTokenHandler().WriteToken(token));
 
-}).WithTags("Autorização");
+}).WithTags("Segurança");
+
+app.MapPost("gerar-chave-reset-senha", (StartlyContext context, string email) =>
+{
+    var startup = context.StartupSet.Include(p => p.Contatos).FirstOrDefault(p => p.Contatos.Any(c => c.Conteudo == email && c.Contato == EnumTipoContato.Email));
+
+    if (startup is not null)
+    {
+        startup.ChaveResetSenha = Guid.NewGuid();
+        context.StartupSet.Update(startup);
+        context.SaveChanges();
+
+        var emailService = new EmailService();
+        var enviarEmailResponse = emailService.EnviarEmail(email, "Reset de Senha", $"https://url-front/reset-senha/{startup.ChaveResetSenha}", true);
+        if (!enviarEmailResponse.Sucesso)
+            return Results.BadRequest(new BaseResponse("Erro ao enviar o e-mail: " + enviarEmailResponse.Mensagem));
+    }
+
+    return Results.Ok(new BaseResponse("Se o e-mail informado estiver correto, você receberá as instruções por e-mail."));
+}).WithTags("Segurança");
+
+app.MapPut("resetar-senha", (StartlyContext context, Guid chaveResetSenha, string novaSenha) =>
+{
+    var startup = context.StartupSet.FirstOrDefault(p => p.ChaveResetSenha == chaveResetSenha);
+
+    if (startup is null)
+        return Results.BadRequest(new BaseResponse("Chave de reset de senha inválida."));
+
+    startup.Senha = novaSenha.EncryptPassword();
+    startup.ChaveResetSenha = null;
+    context.StartupSet.Update(startup);
+    context.SaveChanges();
+
+    return Results.Ok(new BaseResponse("Senha alterada com sucesso."));
+}).WithTags("Segurança");
+
+app.MapPut("alterar-senha", (StartlyContext context, ClaimsPrincipal claims, AlterarSenhaDto alterarSenhaDto) =>
+{
+    var userIdClaim = claims.FindFirst("Id")?.Value;
+    if (userIdClaim == null)
+        return Results.Unauthorized();
+
+    var userId = Guid.Parse(userIdClaim);
+    var startup = context.StartupSet.FirstOrDefault(p => p.Id == userId);
+    if (startup == null)
+        return Results.NotFound(new BaseResponse("Usuário não encontrado."));
+
+    startup.Senha = alterarSenhaDto.NovaSenha.EncryptPassword();
+    context.StartupSet.Update(startup);
+    context.SaveChanges();
+
+    return Results.Ok(new BaseResponse("Senha alterada com sucesso."));
+}).WithTags("Segurança");
 
 #endregion
 

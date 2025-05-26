@@ -79,6 +79,9 @@ namespace Startly.Infra.Data.Configurations
             builder.Property(p => p.Logo)
                 .IsRequired();
 
+            builder.Property(p => p.ChaveResetSenha)
+                .IsRequired(false);
+
             builder.ToTable("TB_Startup");
 
         }
