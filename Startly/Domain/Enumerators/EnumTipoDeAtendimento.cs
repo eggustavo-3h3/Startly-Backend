@@ -1,4 +1,4 @@
-﻿namespace Startly.Enumerators
+﻿namespace Startly.Domain.Enumerators
 {
     public enum EnumTipoDeAtendimento
     {

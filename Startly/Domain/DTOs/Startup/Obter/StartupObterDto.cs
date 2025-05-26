@@ -1,4 +1,4 @@
-﻿using Startly.Enumerators;
+﻿using Startly.Domain.Enumerators;
 
 namespace Startly.Domain.DTOs.Startup.Obter
 {

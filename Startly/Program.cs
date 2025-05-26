@@ -18,8 +18,8 @@ using Startly.Domain.DTOs.AlterarSenha;
 using Startly.Domain.DTOs.ResetSenha;
 using Startly.Domain.DTOs.Startup.Listar;
 using Startly.Domain.DTOs.Startup.Obter;
-using Startly.Enumerators;
 using Startly.Infra.Email;
+using Startly.Domain.Enumerators;
 
 var builder = WebApplication.CreateBuilder(args);
 
