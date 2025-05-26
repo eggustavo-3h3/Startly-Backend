@@ -14,8 +14,10 @@ using Startly.Infra.Data.Context;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Startly.Domain.DTOs.AlterarSenha;
+using Startly.Domain.DTOs.ResetSenha;
 using Startly.Domain.DTOs.Startup.Listar;
 using Startly.Domain.DTOs.Startup.Obter;
 using Startly.Enumerators;
@@ -152,11 +154,10 @@ app.MapPost("atuacao/adicionar", (StartlyContext context, AtuacaoAdicionarDto at
 app.MapPut("atuacao/atualizar", (StartlyContext context, AtuacaoAtualizarDto atuacaoAtualizarDto) =>
 {
     var resultado = new AtuacaoAtualizarDtoValidator().Validate(atuacaoAtualizarDto);
-    var atuacao = context.AtuacaoSet.Find(atuacaoAtualizarDto.Id);
-
     if (!resultado.IsValid)
         return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
 
+    var atuacao = context.AtuacaoSet.Find(atuacaoAtualizarDto.Id);
     if (atuacao == null)
         return Results.NotFound($"Atucação com ID {atuacaoAtualizarDto.Id} não encontrada.");
 
@@ -442,9 +443,13 @@ app.MapPost("autenticar", (StartlyContext context, AutenticarDto autenticarDto) 
 
 }).WithTags("Segurança");
 
-app.MapPost("gerar-chave-reset-senha", (StartlyContext context, string email) =>
+app.MapPost("gerar-chave-reset-senha", (StartlyContext context, GerarResetSenhaDto gerarResetSenhaDto) =>
 {
-    var startup = context.StartupSet.Include(p => p.Contatos).FirstOrDefault(p => p.Contatos.Any(c => c.Conteudo == email && c.Contato == EnumTipoContato.Email));
+    var resultado = new GerarResetSenhaDtoValidator().Validate(gerarResetSenhaDto);
+    if (!resultado.IsValid)
+        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
+
+    var startup = context.StartupSet.Include(p => p.Contatos).FirstOrDefault(p => p.Contatos.Any(c => c.Conteudo == gerarResetSenhaDto.Email && c.Contato == EnumTipoContato.Email));
 
     if (startup is not null)
     {
@@ -453,7 +458,7 @@ app.MapPost("gerar-chave-reset-senha", (StartlyContext context, string email) =>
         context.SaveChanges();
 
         var emailService = new EmailService();
-        var enviarEmailResponse = emailService.EnviarEmail(email, "Reset de Senha", $"https://url-front/reset-senha/{startup.ChaveResetSenha}", true);
+        var enviarEmailResponse = emailService.EnviarEmail(gerarResetSenhaDto.Email, "Reset de Senha", $"https://url-front/reset-senha/{startup.ChaveResetSenha}", true);
         if (!enviarEmailResponse.Sucesso)
             return Results.BadRequest(new BaseResponse("Erro ao enviar o e-mail: " + enviarEmailResponse.Mensagem));
     }
@@ -461,14 +466,18 @@ app.MapPost("gerar-chave-reset-senha", (StartlyContext context, string email) =>
     return Results.Ok(new BaseResponse("Se o e-mail informado estiver correto, você receberá as instruções por e-mail."));
 }).WithTags("Segurança");
 
-app.MapPut("resetar-senha", (StartlyContext context, Guid chaveResetSenha, string novaSenha) =>
+app.MapPut("resetar-senha", (StartlyContext context, ResetSenhaDto resetSenhaDto) =>
 {
-    var startup = context.StartupSet.FirstOrDefault(p => p.ChaveResetSenha == chaveResetSenha);
+    var resultado = new ResetSenhaDtoValidator().Validate(resetSenhaDto);
+    if (!resultado.IsValid)
+        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
+
+    var startup = context.StartupSet.FirstOrDefault(p => p.ChaveResetSenha == resetSenhaDto.ChaveResetSenha);
 
     if (startup is null)
         return Results.BadRequest(new BaseResponse("Chave de reset de senha inválida."));
 
-    startup.Senha = novaSenha.EncryptPassword();
+    startup.Senha = resetSenhaDto.NovaSenha.EncryptPassword();
     startup.ChaveResetSenha = null;
     context.StartupSet.Update(startup);
     context.SaveChanges();
@@ -478,6 +487,10 @@ app.MapPut("resetar-senha", (StartlyContext context, Guid chaveResetSenha, strin
 
 app.MapPut("alterar-senha", (StartlyContext context, ClaimsPrincipal claims, AlterarSenhaDto alterarSenhaDto) =>
 {
+    var resultado = new AlterarSenhaDtoValidator().Validate(alterarSenhaDto);
+    if (!resultado.IsValid)
+        return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
+
     var userIdClaim = claims.FindFirst("Id")?.Value;
     if (userIdClaim == null)
         return Results.Unauthorized();
