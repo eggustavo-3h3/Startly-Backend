@@ -1,6 +1,4 @@
-﻿using Startly.Enumerators;
-
-namespace Startly.Domain.DTOs.Startup.Atualizar
+﻿namespace Startly.Domain.DTOs.Startup.Atualizar
 {
     public class StartupImagemAtualizarDto
     {

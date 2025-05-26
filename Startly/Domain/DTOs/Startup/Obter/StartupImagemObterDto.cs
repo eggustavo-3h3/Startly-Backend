@@ -1,6 +1,4 @@
-﻿using Startly.Enumerators;
-
-namespace Startly.Domain.DTOs.Startup.Obter
+﻿namespace Startly.Domain.DTOs.Startup.Obter
 {
     public class StartupImagemObterDto
     {

@@ -1,6 +1,4 @@
-﻿using Startly.Enumerators;
-
-namespace Startly.Domain.DTOs.Startup.Adicionar
+﻿namespace Startly.Domain.DTOs.Startup.Adicionar
 {
     public class StartupImagemAdicionarDto
     {

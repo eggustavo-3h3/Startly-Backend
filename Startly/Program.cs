@@ -14,8 +14,6 @@ using Startly.Infra.Data.Context;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using Startly.Domain.DTOs.AlterarSenha;
 using Startly.Domain.DTOs.ResetSenha;
 using Startly.Domain.DTOs.Startup.Listar;

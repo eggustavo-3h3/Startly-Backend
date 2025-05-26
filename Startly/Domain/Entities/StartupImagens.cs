@@ -1,6 +1,4 @@
-﻿using Startly.Enumerators;
-
-namespace Startly.Domain.Entities
+﻿namespace Startly.Domain.Entities
 {
     public class StartupImagem
     {
