@@ -189,6 +189,7 @@ app.MapGet("startup/listar", (StartlyContext context) =>
         Id = x.Id,
         Nome = x.Nome,
         Descricao = x.Descricao,
+        Logo = x.Logo,
         Atuacoes = x.Atuacoes.Select(a => new StartupAtuacaoListarDto
         {
             Descricao = a.Atuacao.Descricao
