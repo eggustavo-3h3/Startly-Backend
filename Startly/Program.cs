@@ -250,7 +250,7 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
     return Results.Ok(startupDto);
 }).WithTags("Startup");
 
-app.MapGet("startup/buscar/{nome}", (StartlyContext context, [FromQuery] string nome) =>
+app.MapGet("startup/buscar", (StartlyContext context, [FromQuery] string nome) =>
 {
     var startups = context.StartupSet.Include(p => p.Atuacoes).Where(p => p.Nome == nome).Select(p => new StartupObterPorNomeDto
     {
