@@ -24,8 +24,9 @@ namespace Startly.Domain.DTOs.Startup.Obter
         public EnumTicketMedio EnumTicket { get; set; }
         public EnumTipoDeAtendimento EnumTipoDeAtendimento { get; set; }
         public string ResponsavelCadastro { get; set; } = string.Empty;
-        public List<StartupAtuacaoObterDto> Atuacoes { get; set; } = [];
-        public List<StartupVideoObterDto> Videos { get; set; } = [];
+        public string Logo { get; set; } = string.Empty;
+        public List<StartupAtuacaoObterNomeDto> Atuacoes { get; set; } = [];
+        public List<StartupVideoObterPorNomeDto> Videos { get; set; } = [];
         public List<StartupImagemObterDto> Imagens { get; set; } = [];
 
     }

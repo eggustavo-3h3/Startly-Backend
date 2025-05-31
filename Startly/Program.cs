@@ -20,6 +20,7 @@ using Startly.Domain.DTOs.Startup.Listar;
 using Startly.Domain.DTOs.Startup.Obter;
 using Startly.Infra.Email;
 using Startly.Domain.Enumerators;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -236,7 +237,7 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
         EnumTicket = startup.EnumTicket,
         EnumTipoDeAtendimento = startup.EnumTipoDeAtendimento,
         ResponsavelCadastro = startup.ResponsavelCadastro,
-        Atuacoes = startup.Atuacoes.Select(a => new StartupAtuacaoObterDto
+        Atuacoes = startup.Atuacoes.Select(a => new StartupAtuacaoObterNomeDto
         {
             Descricao = a.Atuacao.Descricao
         }).ToList(),
@@ -244,13 +245,30 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
         {
             Imagem = i.Imagem
         }).ToList(),
-        Videos = startup.Videos.Select(v => new StartupVideoObterDto
+        Videos = startup.Videos.Select(v => new StartupVideoObterPorNomeDto
         {
             LinkVideo = v.LinkVideo,
         }).ToList(),
     };
 
     return Results.Ok(startupDto);
+}).WithTags("Startup");
+
+app.MapGet("startup/buscar/{nome}", (StartlyContext context, [FromQuery] string nome) =>
+{
+    var startups = context.StartupSet.Include(p => p.Atuacoes).Where(p => p.Nome == nome).Select(p => new StartupObterPorNomeDto
+    {
+        Id = p.Id,
+        Nome = p.Nome,
+        Descricao = p.Descricao,
+        Logo = p.Logo,
+        Atuacoes = p.Atuacoes.Select(a => new StartupAtuacaoObterNomeDto
+        {
+            Descricao = a.Atuacao.Descricao
+        }).ToList(),
+    }).ToList();
+
+    return startups.Count == 0 ? Results.NotFound(new BaseResponse("Nenhuma Startup Encontrada com esse Nome!!!")) : Results.Ok(startups);
 }).WithTags("Startup");
 
 app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto startupAdicionarDto) =>
@@ -434,7 +452,8 @@ app.MapPost("gerar-chave-reset-senha", (StartlyContext context, GerarResetSenhaD
     if (!resultado.IsValid)
         return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
 
-    var startup = context.StartupSet.Include(p => p.Contatos).FirstOrDefault(p => p.Contatos.Any(c => c.Conteudo == gerarResetSenhaDto.Email && c.Contato == EnumTipoContato.Email));
+    var startup = context.StartupSet
+        .FirstOrDefault(p => p.EmailCorporativo == gerarResetSenhaDto.Email);
 
     if (startup is not null)
     {

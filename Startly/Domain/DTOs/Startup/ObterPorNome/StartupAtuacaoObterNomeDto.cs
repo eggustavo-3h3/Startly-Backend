@@ -1,6 +1,6 @@
 ﻿namespace Startly.Domain.DTOs.Startup.Obter
 {
-    public class StartupAtuacaoObterNomeDto
+    public class StartupObterNomeDto
     {
         public string Descricao { get; set; } = string.Empty;
     }
