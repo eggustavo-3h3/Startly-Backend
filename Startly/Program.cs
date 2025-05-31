@@ -209,7 +209,6 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
     var startup = context.StartupSet
         .Include(p => p.Atuacoes).ThenInclude(atuacoes => atuacoes.Atuacao)
         .Include(p => p.Imagens)
-        .Include(p => p.Videos)
         .FirstOrDefault(p => p.Id == id);
 
     if (startup == null)
@@ -237,7 +236,7 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
         EnumTicket = startup.EnumTicket,
         EnumTipoDeAtendimento = startup.EnumTipoDeAtendimento,
         ResponsavelCadastro = startup.ResponsavelCadastro,
-        Atuacoes = startup.Atuacoes.Select(a => new StartupAtuacaoObterNomeDto
+        Atuacoes = startup.Atuacoes.Select(a => new StartupAtuacaoObterDto
         {
             Descricao = a.Atuacao.Descricao
         }).ToList(),
@@ -245,10 +244,7 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
         {
             Imagem = i.Imagem
         }).ToList(),
-        Videos = startup.Videos.Select(v => new StartupVideoObterPorNomeDto
-        {
-            LinkVideo = v.LinkVideo,
-        }).ToList(),
+        UrlVideo = startup.UrlVideo
     };
 
     return Results.Ok(startupDto);
@@ -262,7 +258,7 @@ app.MapGet("startup/buscar/{nome}", (StartlyContext context, [FromQuery] string 
         Nome = p.Nome,
         Descricao = p.Descricao,
         Logo = p.Logo,
-        Atuacoes = p.Atuacoes.Select(a => new StartupAtuacaoObterNomeDto
+        Atuacoes = p.Atuacoes.Select(a => new StartupAtuacaoObterDto
         {
             Descricao = a.Atuacao.Descricao
         }).ToList(),
@@ -305,6 +301,7 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
         Login = startupAdicionarDto.Login,
         Senha = startupAdicionarDto.Senha.EncryptPassword(),
         Logo = startupAdicionarDto.Logo,
+        UrlVideo = startupAdicionarDto.UrlVideo,
         Atuacoes = startupAdicionarDto.Atuacoes.Select(a => new StartupAtuacao
         {
             Id = Guid.NewGuid(),
@@ -316,12 +313,6 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
             Id = Guid.NewGuid(),
             StartupId = idStartup,
             Imagem = i.Imagem
-        }).ToList(),
-        Videos = startupAdicionarDto.Videos.Select(v => new StartupVideo
-        {
-            Id = Guid.NewGuid(),
-            StartupId = idStartup,
-            LinkVideo = v.LinkVideo
         }).ToList()
     };
 
@@ -341,13 +332,11 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
     var startup = context.StartupSet
         .Include(p => p.Atuacoes)
         .Include(p => p.Imagens)
-        .Include(p => p.Videos)
         .FirstOrDefault(p => p.Id == startupAtualizarDto.Id);
 
     if (startup == null)
         return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup de Id: {startupAtualizarDto.Id}."));
 
-    startup.Videos.ToList().ForEach(startupVideo => context.StartupVideoSet.Remove(startupVideo));
     startup.Imagens.ToList().ForEach(startupImagem => context.StartupImagemSet.Remove(startupImagem));
     startup.Atuacoes.ToList().ForEach(startupAtuacao => context.StartupAtuacaoSet.Remove(startupAtuacao));
 
@@ -380,16 +369,6 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
             Id = Guid.NewGuid(),
             StartupId = startup.Id,
             Imagem = imagem.Imagem
-        });
-    });
-
-    startupAtualizarDto.Videos.ForEach(video =>
-    {
-        startup.Videos.Add(new StartupVideo
-        {
-            Id = Guid.NewGuid(),
-            StartupId = startup.Id,
-            LinkVideo = video.LinkVideo
         });
     });
 

@@ -88,8 +88,8 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
             RuleFor(p => p.Atuacoes)
                 .NotEmpty().WithMessage("O campo de Atuação não pode estar vázio");
 
-            RuleFor(p => p.Videos)
-                .NotEmpty().WithMessage("O campo de Videos não pode estar vázio");
+            RuleFor(p => p.UrlVideo)
+                .MaximumLength(300).WithMessage("O campo de Vídeo deve ter no máximo 300 caracteres");
 
             RuleFor(p => p.Imagens)
                 .NotEmpty().WithMessage("O campo de Imagens não pode estar vázio");

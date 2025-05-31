@@ -98,6 +98,10 @@ namespace Startly.Infra.Data.Configurations
             builder.Property(p => p.ChaveResetSenha)
                 .IsRequired(false);
 
+            builder.Property(p => p.UrlVideo)
+                .HasMaxLength(300)
+                .IsRequired(false);
+
             builder.ToTable("TB_Startup");
 
         }

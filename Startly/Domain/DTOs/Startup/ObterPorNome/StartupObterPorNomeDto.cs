@@ -8,7 +8,7 @@ namespace Startly.Domain.DTOs.Startup.Obter
         public string Nome { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
         public string Logo { get; set; } = string.Empty;
-        public List<StartupAtuacaoObterNomeDto> Atuacoes { get; set; } = [];
+        public List<StartupAtuacaoObterDto> Atuacoes { get; set; } = [];
 
     }
 }

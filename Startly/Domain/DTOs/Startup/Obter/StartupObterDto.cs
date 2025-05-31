@@ -25,8 +25,8 @@ namespace Startly.Domain.DTOs.Startup.Obter
         public EnumTipoDeAtendimento EnumTipoDeAtendimento { get; set; }
         public string ResponsavelCadastro { get; set; } = string.Empty;
         public string Logo { get; set; } = string.Empty;
-        public List<StartupAtuacaoObterNomeDto> Atuacoes { get; set; } = [];
-        public List<StartupVideoObterPorNomeDto> Videos { get; set; } = [];
+        public List<StartupAtuacaoObterDto> Atuacoes { get; set; } = [];
+        public string? UrlVideo { get; set; }
         public List<StartupImagemObterDto> Imagens { get; set; } = [];
 
     }

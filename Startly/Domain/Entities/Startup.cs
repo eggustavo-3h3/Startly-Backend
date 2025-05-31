@@ -30,6 +30,6 @@ namespace Startly.Domain.Entities
         public Guid? ChaveResetSenha { get; set; }
         public ICollection<StartupAtuacao> Atuacoes { get; set; } = [];
         public ICollection<StartupImagem> Imagens { get; set; } = [];
-        public ICollection<StartupVideo> Videos { get; set; } = [];
+        public string? UrlVideo { get; set; }
     }
 }

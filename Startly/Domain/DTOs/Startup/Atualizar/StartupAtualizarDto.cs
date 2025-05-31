@@ -16,8 +16,8 @@ namespace Startly.Domain.DTOs.Startup.Atualizar
         public EnumTicketMedio TicketMedio { get; set; }
         public EnumTipoDeAtendimento TipoAtendimento { get; set; }
         public string Logo { get; set; } = string.Empty;
+        public string? UrlVideo { get; set; }
         public List<StartupAtuacaoAtualizarDto> Atuacoes { get; set; } = [];
-        public List<StartupVideoAtualizarDto> Videos { get; set; } = [];
         public List<StartupImagemAtualizarDto> Imagens { get; set; } = [];
 
     }

@@ -8,7 +8,6 @@ namespace Startly.Infra.Data.Context
     {
         public DbSet<Startup> StartupSet { get; set; }
         public DbSet<StartupAtuacao> StartupAtuacaoSet { get; set; }
-        public DbSet<StartupVideo> StartupVideoSet { get; set; }
         public DbSet<StartupImagem> StartupImagemSet { get; set; }
         public DbSet<Atuacao> AtuacaoSet { get; set; }
 
@@ -17,7 +16,6 @@ namespace Startly.Infra.Data.Context
             modelBuilder.ApplyConfiguration(new StartupConfiguration());
             modelBuilder.ApplyConfiguration(new StartupImagensConfigurantion());
             modelBuilder.ApplyConfiguration(new StartupAtuacaoConfigurantion());
-            modelBuilder.ApplyConfiguration(new StartupVideoConfiguration());
             modelBuilder.ApplyConfiguration(new AtuacaoConfiguration());
             base.OnModelCreating(modelBuilder);
         }
