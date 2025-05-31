@@ -26,6 +26,22 @@ namespace Startly.Infra.Data.Configurations
                 .IsRequired(false)
                 .HasMaxLength(14);
 
+            builder.Property(p => p.EmailPessoal)
+                .IsRequired(false)
+                .HasMaxLength(200);
+
+            builder.Property(p => p.EmailCorporativo)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            builder.Property(p => p.LinkedIn)
+                .IsRequired(false)
+                .HasMaxLength(300);
+
+            builder.Property(p => p.TelefoneFixo)
+                .IsRequired()
+                .HasMaxLength(14);
+
             builder.Property(p => p.Cep)
                 .IsRequired()
                 .HasMaxLength(9);

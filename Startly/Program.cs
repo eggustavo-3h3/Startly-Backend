@@ -207,7 +207,6 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
     var startup = context.StartupSet
         .Include(p => p.Atuacoes).ThenInclude(atuacoes => atuacoes.Atuacao)
         .Include(p => p.Imagens)
-        .Include(p => p.Contatos)
         .Include(p => p.Videos)
         .FirstOrDefault(p => p.Id == id);
 
@@ -221,6 +220,10 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
         Descricao = startup.Descricao,
         Metas = startup.Metas,
         CNPJ = startup.CNPJ,
+        EmailPessoal = startup.EmailPessoal,
+        EmailCorporativo = startup.EmailCorporativo,
+        TelefoneFixo = startup.TelefoneFixo,
+        LinkedIn = startup.LinkedIn,
         Cep = startup.Cep,
         Logradouro = startup.Logradouro,
         Numero = startup.Numero,
@@ -239,11 +242,6 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
         Imagens = startup.Imagens.Select(i => new StartupImagemObterDto
         {
             Imagem = i.Imagem
-        }).ToList(),
-        Contatos = startup.Contatos.Select(c => new StartupContatoObterDto
-        {
-            TipoContato = c.Contato,
-            Conteudo = c.Conteudo
         }).ToList(),
         Videos = startup.Videos.Select(v => new StartupVideoObterDto
         {
@@ -270,6 +268,10 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
         Descricao = startupAdicionarDto.Descricao,
         Metas = startupAdicionarDto.Metas,
         CNPJ = startupAdicionarDto.CNPJ,
+        EmailPessoal = startupAdicionarDto.EmailPessoal,
+        EmailCorporativo = startupAdicionarDto.EmailCorporativo,
+        TelefoneFixo = startupAdicionarDto.TelefoneFixo,
+        LinkedIn = startupAdicionarDto.LinkedIn,
         Cep = startupAdicionarDto.Cep,
         Logradouro = startupAdicionarDto.Logradouro,
         Numero = startupAdicionarDto.Numero,
@@ -296,13 +298,6 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
             StartupId = idStartup,
             Imagem = i.Imagem
         }).ToList(),
-        Contatos = startupAdicionarDto.Contatos.Select(c => new StartupContato
-        {
-            Id = Guid.NewGuid(),
-            StartupId = idStartup,
-            Contato = c.Contato,
-            Conteudo = c.Conteudo
-        }).ToList(),
         Videos = startupAdicionarDto.Videos.Select(v => new StartupVideo
         {
             Id = Guid.NewGuid(),
@@ -327,7 +322,6 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
     var startup = context.StartupSet
         .Include(p => p.Atuacoes)
         .Include(p => p.Imagens)
-        .Include(p => p.Contatos)
         .Include(p => p.Videos)
         .FirstOrDefault(p => p.Id == startupAtualizarDto.Id);
 
@@ -335,13 +329,16 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
         return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup de Id: {startupAtualizarDto.Id}."));
 
     startup.Videos.ToList().ForEach(startupVideo => context.StartupVideoSet.Remove(startupVideo));
-    startup.Contatos.ToList().ForEach(startupContato => context.StartupContatoSet.Remove(startupContato));
     startup.Imagens.ToList().ForEach(startupImagem => context.StartupImagemSet.Remove(startupImagem));
     startup.Atuacoes.ToList().ForEach(startupAtuacao => context.StartupAtuacaoSet.Remove(startupAtuacao));
 
     //Atualizando dados
     startup.Nome = startupAtualizarDto.Nome;
     startup.Descricao = startupAtualizarDto.Descricao;
+    startup.EmailPessoal = startupAtualizarDto.EmailPessoal;
+    startup.EmailCorporativo = startupAtualizarDto.EmailCorporativo;
+    startup.TelefoneFixo = startupAtualizarDto.TelefoneFixo;
+    startup.LinkedIn = startupAtualizarDto.LinkedIn;
     startup.Metas = startupAtualizarDto.Metas;
     startup.QuantidadeFuncionario = startupAtualizarDto.QuantidadeFuncionario;
     startup.EnumTicket = startupAtualizarDto.TicketMedio;
@@ -364,17 +361,6 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
             Id = Guid.NewGuid(),
             StartupId = startup.Id,
             Imagem = imagem.Imagem
-        });
-    });
-
-    startupAtualizarDto.Contatos.ForEach(contato =>
-    {
-        startup.Contatos.Add(new StartupContato
-        {
-            Id = Guid.NewGuid(),
-            StartupId = startup.Id,
-            Contato = contato.Contato,
-            Conteudo = contato.Conteudo
         });
     });
 

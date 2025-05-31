@@ -9,6 +9,10 @@ namespace Startly.Domain.DTOs.Startup.Obter
         public string Descricao { get; set; } = string.Empty;
         public string Metas { get; set; } = string.Empty;
         public string? CNPJ { get; set; }
+        public string? EmailPessoal { get; set; }
+        public string EmailCorporativo { get; set; } = string.Empty;
+        public string TelefoneFixo { get; set; } = string.Empty;
+        public string? LinkedIn { get; set; }
         public string Cep { get; set; } = string.Empty;
         public string Logradouro { get; set; } = string.Empty;
         public string Numero { get; set; } = string.Empty;
@@ -23,7 +27,6 @@ namespace Startly.Domain.DTOs.Startup.Obter
         public List<StartupAtuacaoObterDto> Atuacoes { get; set; } = [];
         public List<StartupVideoObterDto> Videos { get; set; } = [];
         public List<StartupImagemObterDto> Imagens { get; set; } = [];
-        public List<StartupContatoObterDto> Contatos { get; set; } = [];
 
     }
 }

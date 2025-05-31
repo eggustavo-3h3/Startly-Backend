@@ -8,6 +8,10 @@ namespace Startly.Domain.DTOs.Startup.Atualizar
         public string Nome { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
         public string Metas { get; set; } = string.Empty;
+        public string? EmailPessoal { get; set; }
+        public string EmailCorporativo { get; set; } = string.Empty;
+        public string TelefoneFixo { get; set; } = string.Empty;
+        public string? LinkedIn { get; set; }
         public int QuantidadeFuncionario { get; set; }
         public EnumTicketMedio TicketMedio { get; set; }
         public EnumTipoDeAtendimento TipoAtendimento { get; set; }
@@ -15,7 +19,6 @@ namespace Startly.Domain.DTOs.Startup.Atualizar
         public List<StartupAtuacaoAtualizarDto> Atuacoes { get; set; } = [];
         public List<StartupVideoAtualizarDto> Videos { get; set; } = [];
         public List<StartupImagemAtualizarDto> Imagens { get; set; } = [];
-        public List<StartupContatoAtualizarDto> Contatos { get; set; } = [];
 
     }
 }

@@ -9,6 +9,10 @@ namespace Startly.Domain.Entities
         public string Descricao { get; set; } = string.Empty;
         public string Metas { get; set; } = string.Empty;
         public string? CNPJ { get; set; }
+        public string? EmailPessoal { get; set; }
+        public string EmailCorporativo { get; set; } = string.Empty;
+        public string TelefoneFixo { get; set; } = string.Empty;
+        public string? LinkedIn { get; set; } 
         public string Cep { get; set; } = string.Empty;
         public string Logradouro { get; set; } = string.Empty;
         public string Numero { get; set; } = string.Empty;
@@ -26,7 +30,6 @@ namespace Startly.Domain.Entities
         public Guid? ChaveResetSenha { get; set; }
         public ICollection<StartupAtuacao> Atuacoes { get; set; } = [];
         public ICollection<StartupImagem> Imagens { get; set; } = [];
-        public ICollection<StartupContato> Contatos { get; set; } = [];
         public ICollection<StartupVideo> Videos { get; set; } = [];
     }
 }

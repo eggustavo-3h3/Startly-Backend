@@ -21,6 +21,20 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
             RuleFor(p => p.CNPJ)
             .MaximumLength(14).WithMessage("O campo CNPJ deve ter no máximo 14 caracteres");
 
+            RuleFor(p => p.EmailPessoal)
+                .MaximumLength(200).WithMessage("O campo Email Pessoal deve ter no máximo 200 caracteres");
+
+            RuleFor(p => p.EmailCorporativo)
+                .NotEmpty().WithMessage("O campo Email Corporativo não pode estar vázio")
+                .MaximumLength(200).WithMessage("O campo Email Corporativo deve ter no máximo 200 caracteres");
+
+            RuleFor(p => p.LinkedIn)
+                .MaximumLength(300).WithMessage("O campo de Link do LinkdIn deve ter no máximo 300 caracteres");
+
+            RuleFor(p => p.TelefoneFixo)
+                .NotEmpty().WithMessage("O campo Telefone não pode estar vázio")
+                 .MaximumLength(14).WithMessage("O campo Email Pessoal deve ter no máximo 14 caracteres Contando - e ()");
+
             RuleFor(p => p.Cep)
                 .NotEmpty().WithMessage("O campo Cep não pode estar vázio")
                 .MaximumLength(9).WithMessage("O campo Cep deve ter no Máximo 9 caracteres")
@@ -44,13 +58,13 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
 
             RuleFor(p => p.UF)
                 .NotEmpty().WithMessage("O campo UF não pode estar vázio")
-                .MaximumLength(2).WithMessage("O campo Cep deve ter no Máximo 2 caraxteres");
+                .MaximumLength(2).WithMessage("O campo UF deve ter no Máximo 2 caracteres");
 
             RuleFor(p => p.SiteStartup)
                  .MaximumLength(500).WithMessage("O campo Site deve ter no máximo 500 caracteres");
 
             RuleFor(p => p.QuantidadeFuncionario)
-                 .NotEmpty().WithMessage("O campo Cep não pode estar vázio");
+                 .NotEmpty().WithMessage("O campo Quantidade de Funcionarios não pode estar vázio");
 
             RuleFor(p => p.TicketMedio)
                 .NotEmpty().WithMessage("O campo de Ticket Médio não pode estar Vázio");
@@ -80,8 +94,6 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
             RuleFor(p => p.Imagens)
                 .NotEmpty().WithMessage("O campo de Imagens não pode estar vázio");
 
-            RuleFor(p => p.Contatos)
-                .NotEmpty().WithMessage("O campo de Contatos não pode estar vázio");
 
         }
     }

@@ -8,6 +8,10 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
         public string Descricao { get; set; } = string.Empty;
         public string Metas { get; set; } = string.Empty;
         public string? CNPJ { get; set; }
+        public string? EmailPessoal { get; set; }
+        public string EmailCorporativo { get; set; } = string.Empty;
+        public string TelefoneFixo { get; set; } = string.Empty;
+        public string? LinkedIn { get; set; }
         public string Cep { get; set; } = string.Empty;
         public string Logradouro { get; set; } = string.Empty;
         public string Numero { get; set; } = string.Empty;
@@ -26,7 +30,6 @@ namespace Startly.Domain.DTOs.Startup.Adicionar
         public List<StartupAtuacaoAdicionarDto> Atuacoes { get; set; } = [];
         public List<StartupVideoAdicionarDto> Videos { get; set; } = [];
         public List<StartupImagemAdicionarDto> Imagens { get; set; } = [];
-        public List<StartupContatoAdicionarDto> Contatos { get; set; } = [];
 
     }
 }
