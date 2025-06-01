@@ -322,20 +322,25 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
     return Results.Created("Created", new BaseResponse("Startup Adicionada com Sucesso!!!"));
 }).WithTags("Startup");
 
-app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto startupAtualizarDto) =>
+app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto startupAtualizarDto, ClaimsPrincipal claims) =>
 {
     var resultado = new StartupAtualizarDtoValidator().Validate(startupAtualizarDto);
-
     if (!resultado.IsValid)
         return Results.BadRequest(resultado.Errors.Select(error => error.ErrorMessage));
+
+    var userIdClaim = claims.FindFirst("Id")?.Value;
+    if (userIdClaim == null)
+        return Results.Unauthorized();
+
+    var userId = Guid.Parse(userIdClaim);
 
     var startup = context.StartupSet
         .Include(p => p.Atuacoes)
         .Include(p => p.Imagens)
-        .FirstOrDefault(p => p.Id == startupAtualizarDto.Id);
+        .FirstOrDefault(p => p.Id == userId);
 
     if (startup == null)
-        return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup de Id: {startupAtualizarDto.Id}."));
+        return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup de Id: {userId}."));
 
     startup.Imagens.ToList().ForEach(startupImagem => context.StartupImagemSet.Remove(startupImagem));
     startup.Atuacoes.ToList().ForEach(startupAtuacao => context.StartupAtuacaoSet.Remove(startupAtuacao));

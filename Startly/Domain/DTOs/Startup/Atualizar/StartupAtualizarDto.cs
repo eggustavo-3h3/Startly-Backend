@@ -4,7 +4,6 @@ namespace Startly.Domain.DTOs.Startup.Atualizar
 {
     public class StartupAtualizarDto
     {
-        public Guid Id { get; set; }
         public string Nome { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
         public string Metas { get; set; } = string.Empty;
