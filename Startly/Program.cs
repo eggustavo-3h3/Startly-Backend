@@ -231,6 +231,7 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
         Bairro = startup.Bairro,
         Municipio = startup.Municipio,
         UF = startup.UF,
+        Logo = startup.Logo,
         SiteStartup = startup.SiteStartup,
         QuantidadeFuncionario = startup.QuantidadeFuncionario,
         EnumTicket = startup.EnumTicket,
