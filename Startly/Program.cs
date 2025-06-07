@@ -340,11 +340,18 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
         .Include(p => p.Imagens)
         .FirstOrDefault(p => p.Id == userId);
 
-    if (startup == null)
+    if (startup is null)
         return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup de Id: {userId}."));
 
-    startup.Imagens.ToList().ForEach(startupImagem => context.StartupImagemSet.Remove(startupImagem));
-    startup.Atuacoes.ToList().ForEach(startupAtuacao => context.StartupAtuacaoSet.Remove(startupAtuacao));
+    foreach (var si in startup.Imagens)
+    {
+        context.StartupImagemSet.Remove(si);
+    }
+
+    foreach (var sa in startup.Atuacoes)
+    {
+        context.StartupAtuacaoSet.Remove(sa);
+    }
 
     //Atualizando dados
     startup.Nome = startupAtualizarDto.Nome;
@@ -360,7 +367,7 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
 
     startupAtualizarDto.Atuacoes.ForEach(atuacao =>
     {
-        startup.Atuacoes.Add(new StartupAtuacao
+        context.StartupAtuacaoSet.Add(new StartupAtuacao
         {
             Id = Guid.NewGuid(),
             StartupId = startup.Id,
@@ -370,7 +377,7 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
 
     startupAtualizarDto.Imagens.ForEach(imagem =>
     {
-        startup.Imagens.Add(new StartupImagem
+        context.StartupImagemSet.Add(new StartupImagem
         {
             Id = Guid.NewGuid(),
             StartupId = startup.Id,
@@ -381,7 +388,7 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
     context.StartupSet.Update(startup);
     context.SaveChanges();
 
-    return Results.Ok("Curso atualizado com sucesso");
+    return Results.Ok("Startup atualizada com sucesso!");
 }).RequireAuthorization().WithTags("Startup");
 
 app.MapDelete("startup/remover/{id:guid}", (StartlyContext context, Guid id) =>
