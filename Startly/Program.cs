@@ -343,9 +343,12 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
     if (startup is null)
         return Results.NotFound(new BaseResponse($"Não foi Possível encontrar a Startup de Id: {userId}."));
 
-    foreach (var si in startup.Imagens)
+    if (startupAtualizarDto.Imagens.Count > 0)
     {
-        context.StartupImagemSet.Remove(si);
+        foreach (var si in startup.Imagens)
+        {
+            context.StartupImagemSet.Remove(si);
+        }
     }
 
     foreach (var sa in startup.Atuacoes)
