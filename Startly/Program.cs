@@ -234,8 +234,8 @@ app.MapGet("startup/obter/{id:guid}", (StartlyContext context, Guid id) =>
         Logo = startup.Logo,
         SiteStartup = startup.SiteStartup,
         QuantidadeFuncionario = startup.QuantidadeFuncionario,
-        EnumTicket = startup.EnumTicket,
-        EnumTipoDeAtendimento = startup.EnumTipoDeAtendimento,
+        TicketMedio = startup.EnumTicket,
+        TipoAtendimento = startup.EnumTipoDeAtendimento,
         ResponsavelCadastro = startup.ResponsavelCadastro,
         Atuacoes = startup.Atuacoes.Select(a => new StartupAtuacaoObterDto
         {
@@ -323,7 +323,7 @@ app.MapPost("startup/adicionar", (StartlyContext context, StartupAdicionarDto st
     return Results.Created("Created", new BaseResponse("Startup Adicionada com Sucesso!!!"));
 }).WithTags("Startup");
 
-app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto startupAtualizarDto, ClaimsPrincipal claims) =>
+app.MapPut("startup/atualizar", (StartlyContext context, ClaimsPrincipal claims, StartupAtualizarDto startupAtualizarDto) =>
 {
     var resultado = new StartupAtualizarDtoValidator().Validate(startupAtualizarDto);
     if (!resultado.IsValid)
@@ -351,9 +351,12 @@ app.MapPut("startup/atualizar", (StartlyContext context, StartupAtualizarDto sta
         }
     }
 
-    foreach (var sa in startup.Atuacoes)
+    if (startupAtualizarDto.Atuacoes.Count > 0)
     {
-        context.StartupAtuacaoSet.Remove(sa);
+        foreach (var sa in startup.Atuacoes)
+        {
+            context.StartupAtuacaoSet.Remove(sa);
+        }
     }
 
     //Atualizando dados
